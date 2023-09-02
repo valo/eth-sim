@@ -13,10 +13,6 @@ use revm::primitives::Env;
 /// CLI arguments for `cast run`.
 #[derive(Debug, Clone)]
 pub struct TransactionRunner<'a> {
-    /// Opens the transaction in the debugger.
-    /// Print out opcode traces.
-    pub trace_printer: bool,
-
     pub rpc: RpcOpts,
 
     pub block: &'a Block<TxHash>,
@@ -43,11 +39,7 @@ pub async fn get_fork_material(
 }
 
 impl TransactionRunner<'_> {
-    /// Executes the transaction by replaying it
-    ///
-    /// This replays the entire block the transaction was mined in unless `quick` is set to true
-    ///
-    /// Note: This executes the transaction(s) as is: Cheatcodes are disabled
+    /// Runs the transaction and returns the raw call result.
     pub async fn run(self, tx: &Transaction) -> Result<RawCallResult> {
         let figment =
             Config::figment_with_root(find_project_root_path(None).unwrap());
@@ -71,9 +63,6 @@ impl TransactionRunner<'_> {
         env.block.prevrandao = self.block.mix_hash.map(h256_to_b256);
         env.block.basefee = self.block.base_fee_per_gas.unwrap_or_default().into();
         env.block.gas_limit = self.block.gas_limit.into();
-
-        // Execute our transaction
-        executor.set_trace_printer(self.trace_printer);
 
         configure_tx_env(&mut env, &tx);
 
