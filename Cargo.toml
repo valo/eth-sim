@@ -1,0 +1,26 @@
+[package]
+name = "eth-sim"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1.0.75"
+bytes = "1.4.0"
+hex = "0.4.3"
+tokio = { version = "1.32.0", features = ["full"] }
+
+foundry-evm = { git = "https://github.com/foundry-rs/foundry.git", branch = "master" }
+foundry-config = { git = "https://github.com/foundry-rs/foundry.git", branch = "master" }
+foundry-cli = { git = "https://github.com/foundry-rs/foundry.git", branch = "master" }
+ethers-providers = { git = "https://github.com/gakonst/ethers-rs.git" }
+ethers-core = { git = "https://github.com/gakonst/ethers-rs.git" }
+ethers-contract = { git = "https://github.com/gakonst/ethers-rs.git" }
+revm = { git = "https://github.com/bluealloy/revm/", rev = "6b55b9c0ab264c000e087c2f54f2d8dc24b869aa", features = ["ethersdb"] }
+eyre = "0.6.8"
+
+[patch.crates-io]
+revm = { git = "https://github.com/bluealloy/revm/", rev = "6b55b9c0ab264c000e087c2f54f2d8dc24b869aa" }
+ethers-providers = { git = "https://github.com/gakonst/ethers-rs.git" }
+ethers-core = { git = "https://github.com/gakonst/ethers-rs.git" }
