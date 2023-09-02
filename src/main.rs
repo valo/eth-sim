@@ -1,8 +1,8 @@
 use anyhow::{Ok, Result};
 use bytes::Bytes;
 use ethers_contract::BaseContract;
-use ethers_core::abi::parse_abi;
-use ethers_providers::{Provider, Http};
+use ethers_core::{abi::parse_abi};
+use ethers_providers::{Provider, Http, Middleware};
 use foundry_cli::opts::RpcOpts;
 use revm::{
     Database,
@@ -10,7 +10,7 @@ use revm::{
     primitives::{ExecutionResult, Output, TransactTo, B160, U256 as rU256},
     EVM,
 };
-use std::{str::FromStr, sync::Arc, convert::Infallible};
+use std::{str::FromStr, sync::Arc, convert::Infallible, time::Instant};
 
 mod run;
 
@@ -36,10 +36,10 @@ fn create_evm(cache_db : CacheDB<revm::db::EmptyDBTyped<Infallible>>, pool_addre
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let url = "https://mainnet.infura.io/v3/c60b0bb42f8a4c6481ecd229eddaca27";
+    let url = "https://eth.llamarpc.com";
     // create ethers client and wrap it in Arc<M>
-    let client = Provider::<Http>::try_from(url)?;
-    let client = Arc::new(client);
+    let provider = Provider::<Http>::try_from(url)?;
+    let provider = Arc::new(provider);
 
     // ----------------------------------------------------------- //
     //             Storage slots of UniV2Pair contract             //
@@ -71,7 +71,7 @@ async fn main() -> Result<()> {
 
     // // initialize new EthersDB
     let mut ethersdb = EthersDB::new(
-        Arc::clone(&client), 
+        Arc::clone(&provider), 
         None
     ).unwrap();
 
@@ -116,17 +116,44 @@ async fn main() -> Result<()> {
     println!("Reserve1: {:#?}", reserve1);
     println!("Timestamp: {:#?}", ts);
 
-    let encoded = abi.encode("getReserves", ())?;
+    let _encoded = abi.encode("getReserves", ())?;
 
-    let run_args = run::RunArgs {
-        tx_hash: "0x31955b7eba2fedafbfa44c02800e5eed1b71783903d17ceab7cf2d33d147bf32".to_string(),
-        trace_printer: false,
-        rpc: RpcOpts { url: Some(url.to_string()), flashbots: false, jwt_secret: None },
-        debug: false,
-        evm_version: None,
-    };
+    let latest_block_number = provider.get_block_number().await?;
+    let latest_block = provider.get_block(latest_block_number).await?.unwrap();
 
-    println!("{:?}", run_args.run().await);
+    // Fetch all the pending transactions
+    let mempool = provider.txpool_content().await?;
+
+    println!("Fetched {} pending transactions", mempool.pending.len());
+
+    for (_addr, tx) in mempool.pending {
+        for (_nonce, mut tx) in tx {
+            let runner = run::TransactionRunner {
+                trace_printer: false,
+                rpc: RpcOpts { url: Some(url.to_string()), flashbots: false, jwt_secret: None },
+                block: &latest_block,
+                evm_version: None,
+            };
+            // Set the gas price to be the max which the transaction is willing to pay
+            tx.gas_price = tx.max_fee_per_gas;
+
+            let now = Instant::now();
+
+            let result = runner.run(&tx).await;
+
+            match result {
+                Result::Ok(result) => {
+                    println!("Transaction {}: used gas {}, revert: {}", tx.hash(), result.gas_used, result.reverted);
+                    let elapsed_time = now.elapsed();
+                    println!("Elapsed time: {} ms. {} gas/ms", elapsed_time.as_millis(), result.gas_used as f64 / elapsed_time.as_millis() as f64);
+                }
+                Result::Err(e) => {
+                    println!("Transaction {}: error: {}", tx.hash(), e);
+                    println!("{:?}", tx);
+                }
+            }
+        }
+    }
 
     Ok(())
 }
