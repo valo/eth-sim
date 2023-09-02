@@ -3,10 +3,9 @@ use eyre::Result;
 use foundry_cli::opts::RpcOpts;
 use foundry_config::{find_project_root_path, Config, ethers_solc::EvmVersion};
 use foundry_evm::{
-    executor::{inspector::cheatcodes::util::configure_tx_env, opts::EvmOpts, RawCallResult, fork::CreateFork},
+    executor::{inspector::cheatcodes::util::configure_tx_env, opts::EvmOpts, RawCallResult, fork::CreateFork, Backend, ExecutorBuilder},
     revm::primitives::U256 as rU256,
-    trace::TracingExecutor,
-    utils::h256_to_b256,
+    utils::{h256_to_b256, evm_spec},
 };
 use revm::primitives::Env;
 
@@ -53,8 +52,10 @@ impl TransactionRunner<'_> {
             evm_opts
         ).await?;
 
-        let mut executor =
-            TracingExecutor::new(env.clone(), fork, self.evm_version, false).await;
+        let db = Backend::spawn(fork).await;
+        let mut executor = ExecutorBuilder::new()
+                .spec(evm_spec(self.evm_version.unwrap_or_default()))
+                .build(env.clone(), db);
 
         env.block.number = rU256::from(self.block.number.unwrap().as_u64());
         env.block.timestamp = self.block.timestamp.into();

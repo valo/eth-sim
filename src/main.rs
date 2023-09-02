@@ -1,37 +1,12 @@
+use std::time::Instant;
+
 use anyhow::{Ok, Result};
-use bytes::Bytes;
-use ethers_contract::BaseContract;
-use ethers_providers::{Provider, Http, Middleware};
+use ethers_providers::Http;
+use ethers_providers::Provider;
+use ethers_providers::Middleware;
 use foundry_cli::opts::RpcOpts;
-use revm::{
-    Database,
-    db::{CacheDB, EmptyDB, EthersDB},
-    primitives::{TransactTo, B160, U256 as rU256},
-    EVM,
-};
-use std::{str::FromStr, sync::Arc, convert::Infallible, time::Instant};
 
 mod run;
-
-fn create_evm(cache_db : CacheDB<revm::db::EmptyDBTyped<Infallible>>, pool_address: B160, encoded: Bytes) -> Result<EVM<CacheDB<revm::db::EmptyDBTyped<std::convert::Infallible>>>> {
-    // initialise an empty (default) EVM
-    let mut evm = EVM::new();
-
-    // insert pre-built database from above
-    evm.database(cache_db);
-
-    // fill in missing bits of env struct
-    // change that to whatever caller you want to be
-    evm.env.tx.caller = B160::from_str("0x0000000000000000000000000000000000000000")?;
-    // account you want to transact with
-    evm.env.tx.transact_to = TransactTo::Call(pool_address);
-    // calldata formed via abigen
-    evm.env.tx.data = encoded;
-    // transaction value in wei
-    evm.env.tx.value = rU256::try_from(0)?;
-
-    Ok(evm)
-}
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -39,13 +14,15 @@ async fn main() -> Result<()> {
     // create ethers client and wrap it in Arc<M>
     let provider = Provider::<Http>::try_from(url)?;
 
-    let latest_block_number = provider.get_block_number().await?;
-    let latest_block = provider.get_block(latest_block_number).await?.unwrap();
-
     // Fetch all the pending transactions
     let mempool = provider.txpool_content().await?;
 
     println!("Fetched {} pending transactions", mempool.pending.len());
+
+    let latest_block_number = provider.get_block_number().await?;
+    let latest_block = provider.get_block(latest_block_number).await?.unwrap();
+
+    println!("Simulating against block {}", latest_block_number);
 
     for (_addr, tx) in mempool.pending {
         for (_nonce, mut tx) in tx {
