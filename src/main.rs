@@ -4,7 +4,6 @@ use anyhow::{Ok, Result};
 use ethers_providers::Http;
 use ethers_providers::Provider;
 use ethers_providers::Middleware;
-use foundry_cli::opts::RpcOpts;
 
 mod run;
 
@@ -27,26 +26,25 @@ async fn main() -> Result<()> {
     for (_addr, tx) in mempool.pending {
         for (_nonce, mut tx) in tx {
             let runner = run::TransactionRunner {
-                rpc: RpcOpts { url: Some(url.to_string()), flashbots: false, jwt_secret: None },
-                block: &latest_block,
-                evm_version: None,
+                rpc_url: url.to_string(),
+                block: &latest_block
             };
             // Set the gas price to be the max which the transaction is willing to pay
-            tx.gas_price = tx.max_fee_per_gas;
+            tx.gas_price = tx.max_fee_per_gas.or(latest_block.base_fee_per_gas);
 
             let now = Instant::now();
 
-            let result = runner.run(&tx).await;
+            let result = runner.run(&tx);
 
             match result {
                 Result::Ok(result) => {
-                    println!("Transaction {}: used gas {}, revert: {}", tx.hash(), result.gas_used, result.reverted);
-                    println!("Number of state changes: {}", result.state_changeset.unwrap().len());
+                    println!("Transaction {}: used gas {}, success: {}", tx.hash(), result.result.gas_used(), result.result.is_success());
+                    println!("Number of state changes: {}", result.state.len());
                     let elapsed_time = now.elapsed();
-                    println!("Elapsed time: {} ms. {} gas/ms", elapsed_time.as_millis(), result.gas_used as f64 / elapsed_time.as_millis() as f64);
+                    println!("Elapsed time: {} ms. {} gas/ms", elapsed_time.as_millis(), result.result.gas_used() as f64 / elapsed_time.as_millis() as f64);
                 }
                 Result::Err(e) => {
-                    println!("Transaction {}: error: {}", tx.hash(), e);
+                    println!("Transaction {}: error: {:?}", tx.hash(), e);
                     println!("{:?}", tx);
                 }
             }

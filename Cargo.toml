@@ -12,13 +12,12 @@ hex = "0.4.3"
 tokio = { version = "1.32.0", features = ["full"] }
 
 foundry-evm = { git = "https://github.com/foundry-rs/foundry.git", branch = "master" }
-foundry-config = { git = "https://github.com/foundry-rs/foundry.git", branch = "master" }
-foundry-cli = { git = "https://github.com/foundry-rs/foundry.git", branch = "master" }
 ethers-providers = { git = "https://github.com/gakonst/ethers-rs.git" }
 ethers-core = { git = "https://github.com/gakonst/ethers-rs.git" }
 ethers-contract = { git = "https://github.com/gakonst/ethers-rs.git" }
 revm = { git = "https://github.com/bluealloy/revm/", rev = "6b55b9c0ab264c000e087c2f54f2d8dc24b869aa", features = ["ethersdb"] }
 eyre = "0.6.8"
+reqwest = { version = "0.11", default-features = false }
 
 [patch.crates-io]
 revm = { git = "https://github.com/bluealloy/revm/", rev = "6b55b9c0ab264c000e087c2f54f2d8dc24b869aa" }
