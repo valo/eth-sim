@@ -8,7 +8,6 @@ use foundry_evm::{
 };
 use reqwest::Url;
 use revm::{primitives::{ResultAndState, EVMError, U256}, db::EthersDB, EVM, StateBuilder};
-
 /// CLI arguments for `cast run`.
 #[derive(Debug, Clone)]
 pub struct TransactionRunner<'a> {
@@ -18,7 +17,11 @@ pub struct TransactionRunner<'a> {
 }
 
 fn create_retrying_provider(url: &str) -> Provider<RetryClient<Http>> {
-    let client = reqwest::Client::builder().timeout(Duration::from_secs(5)).build().unwrap();
+    let client = reqwest::Client::builder()
+        .connect_timeout(Duration::from_secs(5))
+        .timeout(Duration::from_secs(5))
+        .build()
+        .unwrap();
     let url = Url::parse(url).unwrap();
     let provider = Http::new_with_client(url, client);
 
