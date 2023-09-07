@@ -7,6 +7,6 @@ The current implementation uses Mainnet forks against an RPC node to do the simu
 In order to run the mempool simulator copy the `.env.example` file to `.env`. Set an alternative `RPC_URL` if you want to do that. Then run the main:
 
 ```bash
-$ cp .env.example.env
+$ cp .env.example .env
 $ cargo run
 ```
