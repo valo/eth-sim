@@ -67,7 +67,7 @@ fn watch_new_transactions(provider: Arc<Provider<Ws>>, latest_block: Arc<Mutex<B
                             println!("Transaction {:?}: used gas {}, success: {}", tx.hash, result.result.gas_used(), result.result.is_success());
                             println!("Number of state changes: {}", result.state.len());
                             let elapsed_time = now.elapsed();
-                            println!("Elapsed time: {} ms. {} gas/ms", elapsed_time.as_millis(), result.result.gas_used() as f64 / elapsed_time.as_millis() as f64);
+                            println!("Elapsed time: {} ms. {:.2} MGas/s", elapsed_time.as_millis(), result.result.gas_used() as f64 / 1000000.0 / elapsed_time.as_secs_f64());
                         }
                         Result::Err(e) => {
                             println!("Transaction {:?}: error: {:?}", tx.hash, e);
