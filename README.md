@@ -3,7 +3,7 @@
 A PoC for an Ethereum transaction simulator, which compares two approaches:
 
 1. Use standard ETH RPC calls to fetch the needed state for the simulation and run the EVM code locally
-2. Use a local reth DB to fetch the data and run the EVM code locally
+2. Use a local [reth](https://github.com/paradigmxyz/reth) DB to fetch the data and run the EVM code locally
 
 The local DB approach is much faster compared to using RPC, even when the RPC is running locally.
 
