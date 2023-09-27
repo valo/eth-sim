@@ -17,5 +17,7 @@ In order to run the mempool simulator copy the `.env.example` file to `.env`. Se
 
 ```bash
 $ cp .env.example .env
-$ cargo run
+$ cargo run --release
 ```
+
+Make sure to run with `--release`, so that you can see the true performance of the reth DB simulator.
