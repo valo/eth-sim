@@ -10,17 +10,17 @@ anyhow = "1.0.75"
 bytes = "1.4.0"
 hex = "0.4.3"
 
-foundry-evm = { git = "https://github.com/foundry-rs/foundry.git", branch = "master" }
-ethers-providers = { git = "https://github.com/gakonst/ethers-rs.git" }
-ethers-core = { git = "https://github.com/gakonst/ethers-rs.git" }
-ethers-contract = { git = "https://github.com/gakonst/ethers-rs.git" }
-revm = { git = "https://github.com/bluealloy/revm/", rev = "6b55b9c0ab264c000e087c2f54f2d8dc24b869aa", features = ["ethersdb"] }
+ethers-providers = "2.0.10"
+ethers-core = "2.0.10"
+reth-db = { git = "https://github.com/paradigmxyz/reth.git" }
+reth-primitives = { git = "https://github.com/paradigmxyz/reth.git" }
+reth-provider = { git = "https://github.com/paradigmxyz/reth.git" }
+reth-beacon-consensus = { git = "https://github.com/paradigmxyz/reth.git" }
+reth-blockchain-tree = { git = "https://github.com/paradigmxyz/reth.git" }
+reth-revm = { git = "https://github.com/paradigmxyz/reth.git" }
+reth-interfaces = { git = "https://github.com/paradigmxyz/reth.git" }
+revm = { git = "https://github.com/bluealloy/revm", rev = "516f62cc", features = ["ethersdb"] }
 eyre = "0.6.8"
 reqwest = { version = "0.11", default-features = false }
 dotenv = "0.15.0"
 tokio = { version = "1.32.0", features = ["macros", "rt-multi-thread", "tracing"] }
-
-[patch.crates-io]
-revm = { git = "https://github.com/bluealloy/revm/", rev = "6b55b9c0ab264c000e087c2f54f2d8dc24b869aa" }
-ethers-providers = { git = "https://github.com/gakonst/ethers-rs.git" }
-ethers-core = { git = "https://github.com/gakonst/ethers-rs.git" }
