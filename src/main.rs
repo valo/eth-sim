@@ -114,7 +114,7 @@ async fn run_rpc_simulator() -> eyre::Result<()> {
 
     let transaction_watcher = watch_new_transactions(provider.clone(), latest_block);
 
-    let result = tokio::join!(block_watcher, transaction_watcher);
+    let result = tokio::try_join!(block_watcher, transaction_watcher);
     println!("{:?}", result);
 
     Ok(())
