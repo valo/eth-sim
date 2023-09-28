@@ -7,9 +7,11 @@ A PoC for an Ethereum transaction simulator, which compares two approaches:
 
 The local DB approach is much faster compared to using RPC, even when the RPC is running locally.
 
-Here are some benchmark results of simulating mempool transactions using reth running locally on WSL2 on Windows 11, Ryzen 5 5600X, 24GB RAM, Seagate FireCuda 530 4TB NVME. There is some virtualization overhead, because of the WSL2. Running these natively on a linux server should yield even faster results.
+Here are some benchmark results of simulating mempool transactions using reth running locally on Ubuntu 22.04, Ryzen 5 5600X, 24GB RAM, Seagate FireCuda 530 4TB NVME.
 
-https://docs.google.com/spreadsheets/d/1Hj3_zIlqblrIYF4wM16qTNP6GYexrePaXvDjo0NNCkQ/edit?usp=sharing
+https://docs.google.com/spreadsheets/d/1lolaKiBNtQuFktuw8Pa2tnWLtJcWKG_gHQF06cMCrd4/edit?usp=sharing
+
+You can see from the results that the Reth DB speed is over 2x faster, compare to using the RPC interface of the node.
 
 ## Run
 
