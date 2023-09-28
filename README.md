@@ -13,6 +13,8 @@ https://docs.google.com/spreadsheets/d/1lolaKiBNtQuFktuw8Pa2tnWLtJcWKG_gHQF06cMC
 
 You can see from the results that the Reth DB speed is over 2x faster, compare to using the RPC interface of the node.
 
+![Benchmark results](./images/Screenshot%20from%202023-09-28%2015-59-05.png)
+
 ## Run
 
 In order to run the mempool simulator copy the `.env.example` file to `.env`. Set `WS_RPC_URL` and `HTTP_RPC_URL` to a node which supports fetching the pending transactions in the mempool. Also set `RETH_DB_PATH` to the location of the DB of a locally synced reth node.
