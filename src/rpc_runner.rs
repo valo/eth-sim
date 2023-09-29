@@ -1,12 +1,19 @@
 use std::{sync::Arc, time::Duration};
 
-use ethers_core::types::{Transaction, Block, TxHash, BlockId};
-use ethers_providers::{Provider, Http, RetryClientBuilder, HttpRateLimitRetryPolicy, RetryClient};
+use ethers_core::types::{Block, BlockId, Transaction, TxHash};
+use ethers_providers::{Http, HttpRateLimitRetryPolicy, Provider, RetryClient, RetryClientBuilder};
 use reqwest::Url;
 use reth_revm::StateBuilder;
-use revm::{primitives::{ResultAndState, EVMError, U256, BlockEnv}, db::EthersDB, EVM};
+use revm::{
+    db::EthersDB,
+    primitives::{BlockEnv, EVMError, ResultAndState, U256},
+    EVM,
+};
 
-use crate::{runner::TransactionRunner, utils::{h256_to_b256, configure_tx_env}};
+use crate::{
+    runner::TransactionRunner,
+    utils::{configure_tx_env, h256_to_b256},
+};
 
 #[derive(Debug, Clone)]
 pub struct RpcRunner<'a> {
@@ -25,11 +32,11 @@ fn create_retrying_provider(url: &str) -> Provider<RetryClient<Http>> {
 
     Provider::new(
         RetryClientBuilder::default()
-        .initial_backoff(Duration::from_millis(100))
-        .timeout_retries(5)
-        .rate_limit_retries(100)
-        .compute_units_per_second(330)
-        .build(provider, Box::new(HttpRateLimitRetryPolicy))
+            .initial_backoff(Duration::from_millis(100))
+            .timeout_retries(5)
+            .rate_limit_retries(100)
+            .compute_units_per_second(330)
+            .build(provider, Box::new(HttpRateLimitRetryPolicy)),
     )
 }
 
@@ -51,17 +58,19 @@ impl TransactionRunner for RpcRunner<'_> {
 
         let ethersdb = EthersDB::new(
             provider.clone(),
-            Some(BlockId::from(self.block.number.unwrap().as_u64())))
-            .unwrap();
+            Some(BlockId::from(self.block.number.unwrap().as_u64())),
+        )
+        .unwrap();
 
         let db = StateBuilder::new_with_database(Box::new(ethersdb)).build();
 
         let mut evm = EVM::new();
         evm.database(db);
-        
+
         fill_block_env(&mut evm.env.block, &self.block);
         configure_tx_env(&mut evm.env, &tx);
 
-        evm.transact().map_err(|_e| EVMError::Database(String::from("Error running transaction")))
+        evm.transact()
+            .map_err(|_e| EVMError::Database(String::from("Error running transaction")))
     }
 }
